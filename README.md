@@ -39,6 +39,7 @@ Skrip `build.sh` akan: `repo init` LineageOS 18.1 → memasang `ms013g.xml` seba
 | `ms013g.xml` | `local_manifest` — 11 repo device/kernel/vendor/microG + branch terverifikasi |
 | `build.sh` | Otomatisasi sync + build (`sync` \| `build` \| `all`, env `ENABLE_GO`, `WITH_MICROG`, `JOBS`, `CLEAN`) |
 | `tutorial.html` | Tutorial visual lengkap (langkah 1–6, troubleshooting) |
+| [`twrp/`](twrp/) | Build **TWRP recovery** (minimal-manifest-twrp `twrp-11`) — lihat `twrp/README.md` |
 
 ---
 

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  local_manifest untuk build TWRP (minimal-manifest-twrp, branch twrp-11)
+  Samsung Galaxy Grand 2 Duos — SM-G7102 / ms013g
+
+  Menarik ulang device/kernel/vendor tree Grand-2-Rebirth ke dalam tree TWRP.
+  Cukup jalankan lewat build_twrp.sh (yang juga memasang twrp_ms013g.mk).
+-->
+<manifest>
+
+  <remote name="rebirth" fetch="https://github.com/Grand-2-Rebirth/" />
+  <remote name="los"     fetch="https://github.com/LineageOS/" />
+
+  <!-- ================= DEVICE TREES ================= -->
+  <project name="android_device_samsung_ms013g"
+           path="device/samsung/ms013g"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_device_samsung_ms01-common_los18.1"
+           path="device/samsung/ms01-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_device_samsung_msm8226-common"
+           path="device/samsung/msm8226-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_device_samsung_qcom-common"
+           path="device/samsung/qcom-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <!-- ================= KERNEL ================= -->
+  <project name="android_kernel_samsung_msm8226"
+           path="kernel/samsung/msm8226"
+           remote="rebirth" revision="Rebirth" />
+
+  <!-- ================= HARDWARE / VENDOR ================= -->
+  <project name="android_hardware_samsung"
+           path="hardware/samsung"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_hardware_sony_timekeep"
+           path="hardware/sony/timekeep"
+           remote="los" revision="lineage-18.1" />
+
+  <project name="android_vendor_samsung_ms013g"
+           path="vendor/samsung/ms013g"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_vendor_samsung_ms01-common"
+           path="vendor/samsung/ms01-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_vendor_samsung_msm8226-common"
+           path="vendor/samsung/msm8226-common"
+           remote="rebirth" revision="lineage-18.0" />
+
+  <!-- ================= QCOM (opsional) =================
+       Minimal manifest TWRP berbasis AOSP TIDAK memuat hardware/qcom.
+       Kalau build mengeluh soal 'device/qcom/sepolicy' atau
+       'hardware/qcom/*', HAPUS komentar blok di bawah lalu sync ulang.
+       (Sengaja dinonaktifkan agar sync tetap ramping & repo yg mungkin
+        tak build di tree AOSP tidak ikut kecuali memang diperlukan.)
+
+  <project name="android_device_qcom_sepolicy" path="device/qcom/sepolicy"
+           remote="los" revision="lineage-18.1" />
+  <project name="android_hardware_qcom_display" path="hardware/qcom/display"
+           remote="los" revision="lineage-18.1" />
+  <project name="android_hardware_qcom_audio"   path="hardware/qcom/audio"
+           remote="los" revision="lineage-18.1" />
+  <project name="android_hardware_qcom_media"   path="hardware/qcom/media"
+           remote="los" revision="lineage-18.1" />
+  -->
+
+</manifest>
