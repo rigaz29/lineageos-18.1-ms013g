@@ -1,0 +1,87 @@
+# LineageOS 18.1 — Samsung Galaxy Grand 2 Duos (SM-G7102 / `ms013g`)
+
+Manifest, skrip build, dan tutorial untuk mengompilasi **LineageOS 18.1** dari sumber untuk **Samsung Galaxy Grand 2 Duos** — codename **`ms013g`**.
+
+> Sumber device/kernel/vendor tree: [github.com/Grand-2-Rebirth](https://github.com/Grand-2-Rebirth)
+
+| | |
+|---|---|
+| **Device** | Samsung Galaxy Grand 2 Duos |
+| **Model** | SM-G7102 |
+| **Codename** | `ms013g` |
+| **Chipset** | Qualcomm Snapdragon 400 (MSM8226) |
+| **CPU / RAM** | Quad Cortex-A7 1.4 GHz · 1.5 GB |
+| **lunch** | `lineage_ms013g-userdebug` |
+
+---
+
+## ⚡ Cara cepat
+
+```bash
+# 1. clone repo ini
+git clone https://github.com/rigaz29/lineageos-18.1-ms013g.git
+cd lineageos-18.1-ms013g
+
+# 2. jalankan build (sync + compile). Tambah ENABLE_GO=1 untuk optimasi low-RAM
+SRC_DIR=~/android/lineage ./build.sh          # sync + build
+ENABLE_GO=1 ./build.sh                          # + optimasi Android Go
+```
+
+Skrip `build.sh` akan: `repo init` LineageOS 18.1 → memasang `ms013g.xml` sebagai `local_manifest` → `repo sync` → `lunch` → `mka bacon`.
+
+---
+
+## 📂 Isi repo
+
+| File | Fungsi |
+|---|---|
+| `ms013g.xml` | `local_manifest` — 10 repo device/kernel/vendor + branch yang sudah diverifikasi |
+| `build.sh` | Otomatisasi sync + build (`sync` \| `build` \| `all`, env `ENABLE_GO`, `JOBS`, `CLEAN`) |
+| `tutorial.html` | Tutorial visual lengkap (langkah 1–6, troubleshooting) |
+
+---
+
+## 🧩 Matriks dependensi (terverifikasi)
+
+| Repository | Path | Branch |
+|---|---|---|
+| `android_device_samsung_ms013g` | `device/samsung/ms013g` | `lineage-18.1` |
+| `android_device_samsung_ms01-common_los18.1` | `device/samsung/ms01-common` | `lineage-18.1` |
+| `android_device_samsung_msm8226-common` | `device/samsung/msm8226-common` | `lineage-18.1` |
+| `android_device_samsung_qcom-common` | `device/samsung/qcom-common` | `lineage-18.1` |
+| `android_kernel_samsung_msm8226` | `kernel/samsung/msm8226` | **`Rebirth`** |
+| `android_hardware_samsung` | `hardware/samsung` | `lineage-18.1` |
+| `android_hardware_sony_timekeep` *(LineageOS)* | `hardware/sony/timekeep` | `lineage-18.1` |
+| `android_vendor_samsung_ms013g` | `vendor/samsung/ms013g` | `lineage-18.1` |
+| `android_vendor_samsung_ms01-common` | `vendor/samsung/ms01-common` | `lineage-18.1` |
+| `android_vendor_samsung_msm8226-common` | `vendor/samsung/msm8226-common` | **`lineage-18.0`** |
+
+### Catatan penting
+
+- **Kernel harus branch `Rebirth`.** Tidak ada branch `lineage-18.1` di repo kernel; hanya `Rebirth` yang memuat `lineage_ms013g_defconfig` (dipakai `TARGET_KERNEL_CONFIG`).
+- **Common tree** ada di repo bernama `..._los18.1` tetapi **dipetakan ke path `device/samsung/ms01-common`**.
+- Vendor `msm8226-common` tertinggi hanya sampai `lineage-18.0` — blob forward-compatible, normal.
+
+### Soal branch "Go"
+
+Branch `lineage-18.1-Go` pada common tree ternyata **snapshot lama** (ahead 0, behind 15 vs `lineage-18.1`) dan **tidak** memuat konfigurasi Android Go asli (`ro.config.low_ram` / `go_defaults`). Karena itu manifest ini memakai `lineage-18.1`. Perilaku Go/low-RAM diaktifkan terpisah lewat `ENABLE_GO=1 ./build.sh`.
+
+---
+
+## 🛠️ Prasyarat build host
+
+Ubuntu 20.04/22.04 64-bit, RAM ≥ 8 GB (16 GB ideal), disk kosong ± 200 GB, tool `repo`. Detail dependensi `apt` ada di `tutorial.html` / langkah 1.
+
+---
+
+## 📥 Flash
+
+1. Unlock bootloader + pasang recovery (TWRP / Lineage Recovery) via **Odin** (mode Download: `Vol Down + Home + Power`).
+2. Boot recovery → Wipe (system, data, cache, dalvik).
+3. `adb sideload lineage-18.1-*-UNOFFICIAL-ms013g.zip`
+
+---
+
+## Lisensi
+
+Skrip & manifest di repo ini bebas dipakai/diadaptasi. Device/kernel/vendor tree mengikuti lisensi masing-masing di [Grand-2-Rebirth](https://github.com/Grand-2-Rebirth) dan [LineageOS](https://github.com/LineageOS).

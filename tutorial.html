@@ -1,0 +1,551 @@
+<style>
+  :root {
+    color-scheme: light dark;
+    /* neutrals — cool slate with a slight teal bias */
+    --bg: #eef2f1;
+    --surface: #ffffff;
+    --surface-2: #e6ecea;
+    --border: #d3dcd9;
+    --text: #15201d;
+    --text-dim: #4f5d59;
+    --text-faint: #7d8b87;
+    --accent: #0d998a;
+    --accent-strong: #0a7568;
+    --accent-wash: #dcefec;
+    --warn: #9a6212;
+    --warn-line: #d9a441;
+    --warn-wash: #f8efd9;
+    --danger: #bc3f2a;
+    --danger-wash: #f6e0da;
+    /* terminal cards stay dark in both themes (authentic) */
+    --term-bg: #0b1013;
+    --term-border: #1d282c;
+    --term-text: #cdd7d3;
+    --term-dim: #6d7d79;
+    --term-prompt: #2fc4b2;
+    --term-string: #d6a35a;
+
+    --maxw: 76ch;
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Source Code Pro", Menlo, Consolas, monospace;
+    --sans: "Roboto", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1214;
+      --surface: #131a1d;
+      --surface-2: #182125;
+      --border: #24312f;
+      --text: #e6ecea;
+      --text-dim: #a2b2ae;
+      --text-faint: #6d7d79;
+      --accent: #2fc4b2;
+      --accent-strong: #45d3c1;
+      --accent-wash: #10322e;
+      --warn: #e6ad42;
+      --warn-line: #7a5c1e;
+      --warn-wash: #241d10;
+      --danger: #ef6a4f;
+      --danger-wash: #2a1512;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1214;
+    --surface: #131a1d;
+    --surface-2: #182125;
+    --border: #24312f;
+    --text: #e6ecea;
+    --text-dim: #a2b2ae;
+    --text-faint: #6d7d79;
+    --accent: #2fc4b2;
+    --accent-strong: #45d3c1;
+    --accent-wash: #10322e;
+    --warn: #e6ad42;
+    --warn-line: #7a5c1e;
+    --warn-wash: #241d10;
+    --danger: #ef6a4f;
+    --danger-wash: #2a1512;
+  }
+  :root[data-theme="light"] {
+    --bg: #eef2f1;
+    --surface: #ffffff;
+    --surface-2: #e6ecea;
+    --border: #d3dcd9;
+    --text: #15201d;
+    --text-dim: #4f5d59;
+    --text-faint: #7d8b87;
+    --accent: #0d998a;
+    --accent-strong: #0a7568;
+    --accent-wash: #dcefec;
+    --warn: #9a6212;
+    --warn-line: #d9a441;
+    --warn-wash: #f8efd9;
+    --danger: #bc3f2a;
+    --danger-wash: #f6e0da;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(1.4rem, 4vw, 3.2rem) clamp(1.1rem, 5vw, 2rem) 5rem;
+  }
+
+  /* ---------- header ---------- */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+    margin: 0 0 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.6rem; height: 2px;
+    background: var(--accent);
+    display: inline-block;
+  }
+  h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: clamp(2rem, 6.5vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 0.6rem;
+  }
+  .lede {
+    font-size: 1.08rem;
+    color: var(--text-dim);
+    max-width: 60ch;
+    margin: 0 0 1.5rem;
+  }
+  .codename {
+    font-family: var(--mono);
+    color: var(--accent-strong);
+    font-weight: 600;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+    padding: 0.32rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .chip b { color: var(--text); font-weight: 600; }
+
+  .rule { height: 1px; background: var(--border); border: 0; margin: 2.6rem 0; }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 2.8rem; }
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    margin: 0 0 1rem;
+  }
+  .num {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-strong);
+    background: var(--accent-wash);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: 7px;
+    padding: 0.15rem 0.55rem;
+    flex: none;
+    line-height: 1.4;
+  }
+  h2 {
+    font-size: clamp(1.3rem, 3.5vw, 1.6rem);
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h3 {
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin: 1.8rem 0 0.6rem;
+    color: var(--text);
+  }
+  p { margin: 0.7rem 0; }
+  a { color: var(--accent-strong); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { color: var(--accent); }
+  strong { font-weight: 700; }
+  ul { padding-left: 1.15rem; margin: 0.7rem 0; }
+  li { margin: 0.35rem 0; }
+  code:not(pre code) {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.08em 0.38em;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  /* ---------- terminal command block ---------- */
+  .term {
+    background: var(--term-bg);
+    border: 1px solid var(--term-border);
+    border-radius: 10px;
+    margin: 1.1rem 0;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--term-border);
+    background: #0e1519;
+  }
+  .dots { display: flex; gap: 0.36rem; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; display: block; opacity: 0.85; }
+  .dots i:nth-child(1){ background:#e5654b; }
+  .dots i:nth-child(2){ background:#e0a63a; }
+  .dots i:nth-child(3){ background:#3fb56b; }
+  .term-title {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--term-dim);
+    margin-left: 0.2rem;
+  }
+  .copy {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--term-dim);
+    background: transparent;
+    border: 1px solid var(--term-border);
+    border-radius: 6px;
+    padding: 0.25rem 0.55rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .copy:hover { color: var(--term-prompt); border-color: var(--term-prompt); }
+  .copy:focus-visible { outline: 2px solid var(--term-prompt); outline-offset: 2px; }
+  .copy.done { color: var(--term-prompt); border-color: var(--term-prompt); }
+  pre {
+    margin: 0;
+    padding: 0.95rem 1rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.83rem;
+    line-height: 1.7;
+    color: var(--term-text);
+    tab-size: 2;
+  }
+  pre .c { color: var(--term-dim); }          /* comment */
+  pre .p { color: var(--term-prompt); }        /* prompt / keyword */
+  pre .s { color: var(--term-string); }        /* string / value */
+
+  /* ---------- callouts ---------- */
+  .call {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1.1rem 1.2rem;
+    margin: 1.4rem 0;
+  }
+  .call .k {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .call p:first-of-type { margin-top: 0; }
+  .call p:last-child { margin-bottom: 0; }
+  .call.warn { border-left-color: var(--warn-line); background: var(--warn-wash); }
+  .call.warn .k { color: var(--warn); }
+  .call.info .k { color: var(--accent-strong); }
+
+  /* ---------- tables ---------- */
+  .tablewrap { overflow-x: auto; margin: 1.2rem 0; border: 1px solid var(--border); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 34rem; }
+  th, td { text-align: left; padding: 0.62rem 0.85rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    background: var(--surface-2);
+    font-weight: 600;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td code, th code { font-size: 0.8rem; background: transparent; border: 0; padding: 0; color: var(--text); }
+  .br { font-family: var(--mono); font-size: 0.8rem; color: var(--accent-strong); white-space: nowrap; }
+  .br.alt { color: var(--warn); }
+  .brief { font-family: var(--mono); font-size: 0.82rem; }
+
+  /* ---------- footer ---------- */
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 0.86rem;
+  }
+  footer code { font-size: 0.82rem; }
+  .files { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.8rem 0 1.2rem; }
+  .file {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 7px;
+    padding: 0.4rem 0.7rem;
+    color: var(--text);
+  }
+  .file span { color: var(--text-faint); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Build Guide · LineageOS 18.1</p>
+    <h1>Samsung Galaxy Grand&nbsp;2 Duos</h1>
+    <p class="lede">Kompilasi LineageOS 18.1 dari sumber untuk <span class="codename">SM-G7102</span> — codename <span class="codename">ms013g</span>. Rantai dependensi, branch, dan langkah build yang sudah diverifikasi dari organisasi <a href="https://github.com/Grand-2-Rebirth" target="_blank" rel="noopener">Grand-2-Rebirth</a>.</p>
+    <div class="chips">
+      <span class="chip"><b>SoC</b> Snapdragon 400 · MSM8226</span>
+      <span class="chip"><b>RAM</b> 1.5 GB</span>
+      <span class="chip"><b>CPU</b> Quad Cortex-A7 1.4 GHz</span>
+      <span class="chip"><b>lunch</b> lineage_ms013g</span>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <!-- Finding -->
+  <div class="call warn">
+    <span class="k">⚠ Temuan — soal branch "Go"</span>
+    <p>Perbandingan langsung <code>lineage-18.1-Go</code> vs <code>lineage-18.1</code> pada common tree: branch <strong>“Go” itu snapshot lama</strong> (<span class="brief">ahead 0, behind 15</span>). Branch <code>lineage-18.1</code> punya 15 commit tambahan — fix RIL/telephony, Bluetooth, brightness, dan koreksi baterai 2600 mAh.</p>
+    <p>Seluruh device tree juga di-grep: <strong>tidak ada</strong> <code>ro.config.low_ram=true</code> maupun <code>go_defaults.mk</code> — jadi ini bukan Android Go dalam arti teknis, hanya penamaan.</p>
+    <p><strong>Rekomendasi:</strong> pakai <code>lineage-18.1</code> untuk common tree. Kalau ingin perilaku Go/low-RAM asli (masuk akal untuk 1.5 GB), aktifkan lewat <code>ENABLE_GO=1 ./build.sh</code> — lihat blok Go di bawah.</p>
+  </div>
+
+  <!-- Dependency matrix -->
+  <section>
+    <div class="phase-head"><h2>Matriks dependensi</h2></div>
+    <p>Semua repo di bawah sudah dipetakan ke path yang benar dan branch-nya diverifikasi. Ini isi dari <code>local_manifest</code> (<code>ms013g.xml</code>).</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Repository</th><th>Path</th><th>Branch</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>android_device_samsung_ms013g</code></td><td><code>device/samsung/ms013g</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>…ms01-common_los18.1</code></td><td><code>device/samsung/ms01-common</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>…msm8226-common</code></td><td><code>device/samsung/msm8226-common</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>…qcom-common</code></td><td><code>device/samsung/qcom-common</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>android_kernel_samsung_msm8226</code></td><td><code>kernel/samsung/msm8226</code></td><td class="br alt">Rebirth</td></tr>
+          <tr><td><code>android_hardware_samsung</code></td><td><code>hardware/samsung</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>…sony_timekeep</code> <span class="brief">(LineageOS)</span></td><td><code>hardware/sony/timekeep</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>android_vendor_samsung_ms013g</code></td><td><code>vendor/samsung/ms013g</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>…vendor…ms01-common</code></td><td><code>vendor/samsung/ms01-common</code></td><td class="br">lineage-18.1</td></tr>
+          <tr><td><code>…vendor…msm8226-common</code></td><td><code>vendor/samsung/msm8226-common</code></td><td class="br alt">lineage-18.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="call info">
+      <span class="k">Kenapa dua branch beda warna</span>
+      <p>Kernel hanya punya <code>lineage_ms013g_defconfig</code> di branch <strong>Rebirth</strong> (tidak ada branch 18.1). Vendor <code>msm8226-common</code> tertinggi cuma <strong>lineage-18.0</strong> — normal, blob forward-compatible.</p>
+    </div>
+  </section>
+
+  <!-- Phase 1 -->
+  <section>
+    <div class="phase-head"><span class="num">1</span><h2>Siapkan build host</h2></div>
+    <p>Rekomendasi <strong>Ubuntu 20.04/22.04 64-bit</strong>, RAM ≥ 8 GB (16 GB ideal; kurang → tambah swap), disk kosong ± 200 GB.</p>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">apt · dependencies</span><button class="copy" type="button">Salin</button></div>
+      <pre><span class="p">sudo</span> apt update
+<span class="p">sudo</span> apt install -y bc bison build-essential ccache curl flex \
+  g++-multilib gcc-multilib git git-lfs gnupg gperf imagemagick \
+  lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libsdl1.2-dev \
+  libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool \
+  squashfs-tools xsltproc zip zlib1g-dev python-is-python3 python3 \
+  openjdk-8-jdk-headless libncurses5 libncurses5-dev</pre>
+    </div>
+    <h3>Tool <code>repo</code>, git, dan ccache</h3>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">repo + ccache setup</span><button class="copy" type="button">Salin</button></div>
+      <pre><span class="c"># pasang tool repo</span>
+mkdir -p ~/bin
+curl https://storage.googleapis.com/git-repo-downloads/repo &gt; ~/bin/repo
+chmod a+x ~/bin/repo
+<span class="p">echo</span> <span class="s">'export PATH=~/bin:$PATH'</span> &gt;&gt; ~/.bashrc
+
+<span class="c"># identitas git + git-lfs</span>
+git config --global user.email <span class="s">"ryanbagas27@gmail.com"</span>
+git config --global user.name  <span class="s">"Ryan"</span>
+git lfs install
+
+<span class="c"># ccache — percepat build ulang</span>
+<span class="p">echo</span> <span class="s">'export USE_CCACHE=1'</span> &gt;&gt; ~/.bashrc
+<span class="p">echo</span> <span class="s">'export CCACHE_EXEC=$(which ccache)'</span> &gt;&gt; ~/.bashrc
+<span class="p">source</span> ~/.bashrc
+ccache -M 30G</pre>
+    </div>
+  </section>
+
+  <!-- Phase 2 -->
+  <section>
+    <div class="phase-head"><span class="num">2</span><h2>Inisialisasi source LineageOS 18.1</h2></div>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">repo init</span><button class="copy" type="button">Salin</button></div>
+      <pre>mkdir -p ~/android/lineage &amp;&amp; cd ~/android/lineage
+repo init -u https://github.com/LineageOS/android.git -b <span class="s">lineage-18.1</span> --git-lfs</pre>
+    </div>
+    <p><span class="brief">Tip:</span> tambahkan <code>--depth=1</code> untuk hemat disk/bandwidth (shallow clone).</p>
+  </section>
+
+  <!-- Phase 3 -->
+  <section>
+    <div class="phase-head"><span class="num">3</span><h2>Pasang <code>local_manifest</code></h2></div>
+    <p>Salin file <code>ms013g.xml</code> (sudah disediakan) ke tempat yang benar:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">local_manifests/ms013g.xml</span><button class="copy" type="button">Salin</button></div>
+      <pre>mkdir -p ~/android/lineage/.repo/local_manifests
+cp ms013g.xml ~/android/lineage/.repo/local_manifests/ms013g.xml</pre>
+    </div>
+    <p>Manifest ini pakai dua remote: <code>rebirth</code> (→ Grand-2-Rebirth) untuk semua repo device/kernel/vendor, dan <code>los</code> (→ LineageOS) khusus untuk <code>hardware/sony/timekeep</code>.</p>
+  </section>
+
+  <!-- Phase 4 -->
+  <section>
+    <div class="phase-head"><span class="num">4</span><h2>Sync source</h2></div>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">repo sync</span><button class="copy" type="button">Salin</button></div>
+      <pre>cd ~/android/lineage
+repo sync -c -j<span class="p">$(nproc --all)</span> --force-sync --no-clone-bundle --no-tags
+
+<span class="c"># verifikasi dependensi kunci ikut ke-clone</span>
+ls device/samsung/ms013g device/samsung/ms01-common \
+   kernel/samsung/msm8226 vendor/samsung/ms013g hardware/sony/timekeep</pre>
+    </div>
+    <p><span class="brief">Ukuran:</span> sekali sync ± 40–60 GB. Sabar di koneksi lambat.</p>
+  </section>
+
+  <!-- Phase 5 -->
+  <section>
+    <div class="phase-head"><span class="num">5</span><h2>Build</h2></div>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">envsetup · lunch · mka</span><button class="copy" type="button">Salin</button></div>
+      <pre>cd ~/android/lineage
+<span class="p">source</span> build/envsetup.sh
+
+<span class="c"># set target (breakfast) lalu lunch</span>
+breakfast ms013g
+lunch <span class="s">lineage_ms013g-userdebug</span>
+
+<span class="c"># bikin zip installable</span>
+mka bacon -j<span class="p">$(nproc --all)</span></pre>
+    </div>
+    <p>Hasil ada di <code>out/target/product/ms013g/</code>:</p>
+    <ul>
+      <li><code>lineage-18.1-&lt;tanggal&gt;-UNOFFICIAL-ms013g.zip</code> — paket yang di-flash</li>
+      <li><code>recovery.img</code>, <code>boot.img</code></li>
+    </ul>
+
+    <div class="call info">
+      <span class="k">Opsi — aktifkan Android Go / low-RAM</span>
+      <p>Untuk perilaku Go asli di RAM 1.5 GB, tambahkan properti low-RAM ke <code>device/samsung/ms013g/system.prop</code> (skrip <code>build.sh</code> melakukannya lewat <code>ENABLE_GO=1</code>):</p>
+      <div class="term" style="margin-bottom:0">
+        <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">system.prop — tambahan</span><button class="copy" type="button">Salin</button></div>
+        <pre><span class="p">ro.config.low_ram</span>=true
+<span class="p">ro.lmk.use_minfree_levels</span>=true
+<span class="p">dalvik.vm.heapgrowthlimit</span>=96m
+<span class="p">dalvik.vm.heapsize</span>=256m
+<span class="p">pm.dexopt.first-boot</span>=quicken</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phase 6 -->
+  <section>
+    <div class="phase-head"><span class="num">6</span><h2>Flash ke perangkat</h2></div>
+    <ul>
+      <li>Unlock bootloader &amp; pasang recovery (TWRP / Lineage Recovery). Grand 2 pakai <strong>Odin</strong> di mode Download (<code>Vol&nbsp;Down + Home + Power</code>).</li>
+      <li>Boot ke recovery → <strong>Wipe</strong> system, data, cache, dalvik.</li>
+    </ul>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">adb sideload</span><button class="copy" type="button">Salin</button></div>
+      <pre>adb sideload lineage-18.1-*-UNOFFICIAL-ms013g.zip</pre>
+    </div>
+    <p>GApps opsional — untuk Go + 1.5 GB RAM, pertimbangkan varian ringan (NikGApps “go”) atau tanpa GApps. Boot pertama 5–10 menit.</p>
+  </section>
+
+  <!-- Troubleshooting -->
+  <section>
+    <div class="phase-head"><h2>Troubleshooting</h2></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Masalah</th><th>Solusi</th></tr></thead>
+        <tbody>
+          <tr><td>Kernel gagal / <code>defconfig not found</code></td><td>Pastikan branch kernel = <span class="br alt">Rebirth</span> (di sinilah <code>lineage_ms013g_defconfig</code> berada)</td></tr>
+          <tr><td><code>device/samsung/ms01-common</code> kosong</td><td>Pastikan repo <code>…_los18.1</code> dipetakan ke <em>path</em> <code>device/samsung/ms01-common</code></td></tr>
+          <tr><td>Error toolchain di Ubuntu baru</td><td>Build di Ubuntu 20.04, atau via Docker</td></tr>
+          <tr><td>Out of memory saat compile</td><td>Tambah swap 16–24 GB &amp; turunkan job: <code>mka bacon -j4</code></td></tr>
+          <tr><td>Sync gagal di satu repo</td><td><code>repo sync -c -j4 --force-sync &lt;path&gt;</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p>Dua file pendamping sudah dibuat di direktori kerja:</p>
+    <div class="files">
+      <span class="file">ms013g.xml <span>— local_manifest</span></span>
+      <span class="file">build.sh <span>— sync + build otomatis</span></span>
+    </div>
+    <p>Jalankan semua sekaligus: <code>ENABLE_GO=1 ./build.sh</code> · Sumber: <a href="https://github.com/Grand-2-Rebirth" target="_blank" rel="noopener">github.com/Grand-2-Rebirth</a>. Rantai dependensi &amp; branch diverifikasi via GitHub API, Juli 2026.</p>
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".term").querySelector("pre");
+      var text = pre.innerText;
+      navigator.clipboard.writeText(text).then(function () {
+        var old = btn.textContent;
+        btn.textContent = "Tersalin ✓";
+        btn.classList.add("done");
+        setTimeout(function () { btn.textContent = old; btn.classList.remove("done"); }, 1600);
+      });
+    });
+  });
+</script>

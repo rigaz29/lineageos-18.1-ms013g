@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+
+  <!-- Remotes -->
+  <remote name="rebirth" fetch="https://github.com/Grand-2-Rebirth/" />
+  <remote name="los"     fetch="https://github.com/LineageOS/" />
+
+  <!-- ================= DEVICE TREES ================= -->
+  <project name="android_device_samsung_ms013g"
+           path="device/samsung/ms013g"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <!-- common tree dipetakan ke path device/samsung/ms01-common
+       CATATAN: branch 'lineage-18.1-Go' ternyata snapshot LAMA (kurang 15 commit
+       fix RIL/BT/brightness/baterai) dan TIDAK punya konfigurasi Android Go asli.
+       Karena itu default-nya 'lineage-18.1'. Perilaku Go/low-RAM diaktifkan
+       terpisah via build.sh (ENABLE_GO=1). -->
+  <project name="android_device_samsung_ms01-common_los18.1"
+           path="device/samsung/ms01-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_device_samsung_msm8226-common"
+           path="device/samsung/msm8226-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_device_samsung_qcom-common"
+           path="device/samsung/qcom-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <!-- ================= KERNEL ================= -->
+  <!-- branch 'Rebirth' = satu-satunya yang punya lineage_ms013g_defconfig -->
+  <project name="android_kernel_samsung_msm8226"
+           path="kernel/samsung/msm8226"
+           remote="rebirth" revision="Rebirth" />
+
+  <!-- ================= HARDWARE ================= -->
+  <project name="android_hardware_samsung"
+           path="hardware/samsung"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <!-- timekeep HAL diambil dari LineageOS resmi -->
+  <project name="android_hardware_sony_timekeep"
+           path="hardware/sony/timekeep"
+           remote="los" revision="lineage-18.1" />
+
+  <!-- ================= VENDOR (blobs) ================= -->
+  <project name="android_vendor_samsung_ms013g"
+           path="vendor/samsung/ms013g"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <project name="android_vendor_samsung_ms01-common"
+           path="vendor/samsung/ms01-common"
+           remote="rebirth" revision="lineage-18.1" />
+
+  <!-- vendor msm8226-common: branch tertinggi yang tersedia = lineage-18.0 -->
+  <project name="android_vendor_samsung_msm8226-common"
+           path="vendor/samsung/msm8226-common"
+           remote="rebirth" revision="lineage-18.0" />
+
+</manifest>
