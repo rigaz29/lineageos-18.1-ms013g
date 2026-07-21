@@ -4,6 +4,7 @@
   <!-- Remotes -->
   <remote name="rebirth" fetch="https://github.com/Grand-2-Rebirth/" />
   <remote name="los"     fetch="https://github.com/LineageOS/" />
+  <remote name="microg"  fetch="https://github.com/lineageos4microg/" />
 
   <!-- ================= DEVICE TREES ================= -->
   <project name="android_device_samsung_ms013g"
@@ -56,5 +57,13 @@
   <project name="android_vendor_samsung_msm8226-common"
            path="vendor/samsung/msm8226-common"
            remote="rebirth" revision="lineage-18.0" />
+
+  <!-- ================= microG (lineageos4microg) ================= -->
+  <!-- Repo modern pengganti prebuiltapks. APK-nya diunduh saat build oleh
+       vendorsetup.sh. Aktivasi (paket + signature spoofing) via WITH_MICROG=1
+       di build.sh — meng-clone repo ini saja tidak mengubah ROM. -->
+  <project name="android_vendor_partner_gms"
+           path="vendor/partner_gms"
+           remote="microg" revision="master" />
 
 </manifest>

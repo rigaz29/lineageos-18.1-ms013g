@@ -375,6 +375,7 @@
           <tr><td><code>android_vendor_samsung_ms013g</code></td><td><code>vendor/samsung/ms013g</code></td><td class="br">lineage-18.1</td></tr>
           <tr><td><code>…vendor…ms01-common</code></td><td><code>vendor/samsung/ms01-common</code></td><td class="br">lineage-18.1</td></tr>
           <tr><td><code>…vendor…msm8226-common</code></td><td><code>vendor/samsung/msm8226-common</code></td><td class="br alt">lineage-18.0</td></tr>
+          <tr><td><code>…partner_gms</code> <span class="brief">(microG)</span></td><td><code>vendor/partner_gms</code></td><td class="br">master</td></tr>
         </tbody>
       </table>
     </div>
@@ -493,6 +494,30 @@ mka bacon -j<span class="p">$(nproc --all)</span></pre>
     </div>
   </section>
 
+  <!-- microG -->
+  <section>
+    <div class="phase-head"><span class="num">🔐</span><h2>microG (opsional)</h2></div>
+    <p>Integrasi <a href="https://github.com/lineageos4microg" target="_blank" rel="noopener">lineageos4microg</a> memakai repo modern <code>vendor/partner_gms</code>. Aktivasi lewat <code>WITH_MICROG=1</code> menjalankan tiga langkah otomatis:</p>
+    <ul>
+      <li><strong>Unduh APK</strong> — <code>GmsCore</code>, <code>GsfProxy</code>, <code>FakeStore</code>, <code>F-Droid</code> + Privileged Extension. APK <em>tidak</em> disimpan di git; diunduh saat build oleh <code>vendorsetup.sh</code> → <strong>butuh koneksi internet</strong>.</li>
+      <li><strong>Signature spoofing</strong> — patch <code>frameworks/base</code> (<code>android_frameworks_base-R.patch</code>, Android 11). Menambah permission <code>FAKE_PACKAGE_SIGNATURE</code> + logika spoofing di <code>PackageManagerService</code>. <strong>Tanpa ini microG gagal login.</strong></li>
+      <li><strong>Sertakan paket</strong> — inherit <code>vendor/partner_gms/products/gms.mk</code> ke <code>lineage_ms013g.mk</code>.</li>
+    </ul>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">build dengan microG</span><button class="copy" type="button">Salin</button></div>
+      <pre><span class="c"># microG + optimasi Go sekaligus (rekomendasi untuk 1.5 GB RAM)</span>
+WITH_MICROG=1 ENABLE_GO=1 ./build.sh build</pre>
+    </div>
+    <div class="call info">
+      <span class="k">Verifikasi setelah flash</span>
+      <p>Buka app <strong>microG Settings → Self-Check</strong>. Baris <em>“System grants signature spoofing”</em> harus tercentang ✓. Lalu login akun Google &amp; aktifkan <em>Cloud Messaging</em> untuk push notification.</p>
+    </div>
+    <div class="call warn">
+      <span class="k">⚠ Tree jadi dirty</span>
+      <p>Patch mengubah <code>frameworks/base</code>. Sebelum <code>repo sync</code> berikutnya: <code>(cd frameworks/base &amp;&amp; git checkout .)</code>. Skrip mendeteksi patch yang sudah terpasang, jadi aman dijalankan berulang.</p>
+    </div>
+  </section>
+
   <!-- Phase 6 -->
   <section>
     <div class="phase-head"><span class="num">6</span><h2>Flash ke perangkat</h2></div>
@@ -530,7 +555,7 @@ mka bacon -j<span class="p">$(nproc --all)</span></pre>
       <span class="file">ms013g.xml <span>— local_manifest</span></span>
       <span class="file">build.sh <span>— sync + build otomatis</span></span>
     </div>
-    <p>Jalankan semua sekaligus: <code>ENABLE_GO=1 ./build.sh</code> · Sumber: <a href="https://github.com/Grand-2-Rebirth" target="_blank" rel="noopener">github.com/Grand-2-Rebirth</a>. Rantai dependensi &amp; branch diverifikasi via GitHub API, Juli 2026.</p>
+    <p>Jalankan semua sekaligus: <code>WITH_MICROG=1 ENABLE_GO=1 ./build.sh</code> · Sumber: <a href="https://github.com/Grand-2-Rebirth" target="_blank" rel="noopener">Grand-2-Rebirth</a> + <a href="https://github.com/lineageos4microg" target="_blank" rel="noopener">lineageos4microg</a>. Dependensi &amp; branch diverifikasi via GitHub API, Juli 2026.</p>
   </footer>
 
 </div>

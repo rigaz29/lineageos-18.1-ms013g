@@ -22,9 +22,10 @@ Manifest, skrip build, dan tutorial untuk mengompilasi **LineageOS 18.1** dari s
 git clone https://github.com/rigaz29/lineageos-18.1-ms013g.git
 cd lineageos-18.1-ms013g
 
-# 2. jalankan build (sync + compile). Tambah ENABLE_GO=1 untuk optimasi low-RAM
-SRC_DIR=~/android/lineage ./build.sh          # sync + build
-ENABLE_GO=1 ./build.sh                          # + optimasi Android Go
+# 2. jalankan build (sync + compile)
+SRC_DIR=~/android/lineage ./build.sh                    # sync + build
+ENABLE_GO=1 ./build.sh                                   # + optimasi Android Go
+WITH_MICROG=1 ENABLE_GO=1 ./build.sh                     # + microG + Go (rekomendasi)
 ```
 
 Skrip `build.sh` akan: `repo init` LineageOS 18.1 → memasang `ms013g.xml` sebagai `local_manifest` → `repo sync` → `lunch` → `mka bacon`.
@@ -35,8 +36,8 @@ Skrip `build.sh` akan: `repo init` LineageOS 18.1 → memasang `ms013g.xml` seba
 
 | File | Fungsi |
 |---|---|
-| `ms013g.xml` | `local_manifest` — 10 repo device/kernel/vendor + branch yang sudah diverifikasi |
-| `build.sh` | Otomatisasi sync + build (`sync` \| `build` \| `all`, env `ENABLE_GO`, `JOBS`, `CLEAN`) |
+| `ms013g.xml` | `local_manifest` — 11 repo device/kernel/vendor/microG + branch terverifikasi |
+| `build.sh` | Otomatisasi sync + build (`sync` \| `build` \| `all`, env `ENABLE_GO`, `WITH_MICROG`, `JOBS`, `CLEAN`) |
 | `tutorial.html` | Tutorial visual lengkap (langkah 1–6, troubleshooting) |
 
 ---
@@ -55,6 +56,7 @@ Skrip `build.sh` akan: `repo init` LineageOS 18.1 → memasang `ms013g.xml` seba
 | `android_vendor_samsung_ms013g` | `vendor/samsung/ms013g` | `lineage-18.1` |
 | `android_vendor_samsung_ms01-common` | `vendor/samsung/ms01-common` | `lineage-18.1` |
 | `android_vendor_samsung_msm8226-common` | `vendor/samsung/msm8226-common` | **`lineage-18.0`** |
+| `lineageos4microg/android_vendor_partner_gms` | `vendor/partner_gms` | `master` |
 
 ### Catatan penting
 
@@ -65,6 +67,24 @@ Skrip `build.sh` akan: `repo init` LineageOS 18.1 → memasang `ms013g.xml` seba
 ### Soal branch "Go"
 
 Branch `lineage-18.1-Go` pada common tree ternyata **snapshot lama** (ahead 0, behind 15 vs `lineage-18.1`) dan **tidak** memuat konfigurasi Android Go asli (`ro.config.low_ram` / `go_defaults`). Karena itu manifest ini memakai `lineage-18.1`. Perilaku Go/low-RAM diaktifkan terpisah lewat `ENABLE_GO=1 ./build.sh`.
+
+---
+
+## 🔐 microG (opsional — `WITH_MICROG=1`)
+
+Integrasi microG memakai repo modern **[`android_vendor_partner_gms`](https://github.com/lineageos4microg/android_vendor_partner_gms)** (pengganti `prebuiltapks` yang sudah deprecated). Aktivasi via `WITH_MICROG=1` menjalankan 3 langkah otomatis di `build.sh`:
+
+1. **Unduh APK** microG (`GmsCore`, `GsfProxy`, `FakeStore`), `F-Droid` + Privileged Extension, dan repo microG F-Droid. APK **tidak** disimpan di git — di-download saat build oleh `vendorsetup.sh`, jadi **butuh koneksi internet** saat aktivasi.
+2. **Signature spoofing** — patch `frameworks/base` dengan [`android_frameworks_base-R.patch`](https://github.com/lineageos4microg/docker-lineage-cicd/tree/master/src/signature_spoofing_patches) (Android 11). Menambah permission `FAKE_PACKAGE_SIGNATURE` + logika spoofing di `PackageManagerService`. Tanpa ini, microG melapor *"Signature spoofing: not supported"* dan gagal login akun Google.
+3. **Sertakan paket** — inherit `vendor/partner_gms/products/gms.mk` ke `lineage_ms013g.mk` (mekanisme `WITH_GMS` LOS 18.1 lewat file opsional yang tak ada di base, jadi inherit langsung lebih andal).
+
+```bash
+WITH_MICROG=1 ./build.sh build
+```
+
+> **Verifikasi setelah flash:** buka app **microG Settings → Self-Check**. Baris *"System grants signature spoofing"* harus ✓. Lalu login akun Google & aktifkan *Cloud Messaging* untuk push notification.
+
+> ⚠️ Patch membuat `frameworks/base` menjadi *dirty*. Sebelum `repo sync` berikutnya: `(cd frameworks/base && git checkout .)`. Skrip mendeteksi patch yang sudah terpasang (idempotent).
 
 ---
 
