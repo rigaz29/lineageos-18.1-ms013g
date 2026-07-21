@@ -99,7 +99,11 @@ do_build() {
 
   [ "$ENABLE_GO" = "1" ] && enable_go
 
+  # Android build env (envsetup/lunch/mka) TIDAK kompatibel dengan 'set -eu':
+  # envsetup.sh mereferensikan $ZSH_VERSION dkk yang unbound di bash.
+  # Matikan sementara, nyalakan lagi setelah build.
   log "source build/envsetup.sh"
+  set +eu
   # shellcheck disable=SC1091
   source build/envsetup.sh
 
@@ -113,6 +117,9 @@ do_build() {
 
   log "Mulai kompilasi (mka bacon, jobs=$JOBS) — santai, ini lama ..."
   mka bacon -j"$JOBS"
+  local rc=$?
+  set -eu
+  [ "$rc" -eq 0 ] || die "Build gagal (mka keluar dengan kode $rc) — cek log di atas."
 
   local out="$SRC_DIR/out/target/product/$DEVICE"
   log "Selesai! Cari hasil di: $out"
