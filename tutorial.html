@@ -500,7 +500,6 @@ mka bacon -j<span class="p">$(nproc --all)</span></pre>
     <p>Integrasi <a href="https://github.com/lineageos4microg" target="_blank" rel="noopener">lineageos4microg</a> memakai repo modern <code>vendor/partner_gms</code>. Aktivasi lewat <code>WITH_MICROG=1</code> menjalankan tiga langkah otomatis:</p>
     <ul>
       <li><strong>Unduh APK</strong> — <code>GmsCore</code>, <code>GsfProxy</code>, <code>FakeStore</code>, <code>F-Droid</code> + Privileged Extension. APK <em>tidak</em> disimpan di git; diunduh saat build oleh <code>vendorsetup.sh</code> → <strong>butuh koneksi internet</strong>.</li>
-      <li><strong>Signature spoofing</strong> — patch <code>frameworks/base</code> (<code>android_frameworks_base-R.patch</code>, Android 11). Menambah permission <code>FAKE_PACKAGE_SIGNATURE</code> + logika spoofing di <code>PackageManagerService</code>. <strong>Tanpa ini microG gagal login.</strong></li>
       <li><strong>Sertakan paket</strong> — inherit <code>vendor/partner_gms/products/gms.mk</code> ke <code>lineage_ms013g.mk</code>.</li>
     </ul>
     <div class="term">
@@ -509,12 +508,28 @@ mka bacon -j<span class="p">$(nproc --all)</span></pre>
 WITH_MICROG=1 ENABLE_GO=1 ./build.sh build</pre>
     </div>
     <div class="call info">
+      <span class="k">Signature spoofing — sudah bawaan LOS 18.1</span>
+      <p>LineageOS 18.1 <strong>sudah</strong> punya signature spoofing <em>restricted</em> di <code>frameworks/base</code> (<code>MICROG_REAL_SIGNATURE</code> + <code>isMicrogSigned()</code> di <code>PackageManagerService</code>). Hanya <strong>microG asli</strong> (yang <code>PRESIGNED</code>) yang boleh menyamar jadi <strong>signature Google</strong>. Jadi <strong>tanpa patch pun microG jalan</strong>.</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Aspek</th><th>Restricted <span class="brief">(default)</span></th><th>Unrestricted <span class="brief">(opsional)</span></th></tr></thead>
+        <tbody>
+          <tr><td>Yang boleh spoof</td><td>hanya microG asli</td><td>app apa pun</td></tr>
+          <tr><td>Target spoof</td><td>signature Google</td><td>signature apa pun</td></tr>
+          <tr><td>Patch <code>frameworks/base</code></td><td class="br">tidak</td><td class="br alt">ya</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Spoofing generik (jarang perlu, melemahkan keamanan) diaktifkan terpisah:</p>
+    <div class="term">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">opsional — unrestricted</span><button class="copy" type="button">Salin</button></div>
+      <pre><span class="c"># patch frameworks/base -&gt; semua app boleh spoof (opsional)</span>
+WITH_MICROG=1 MICROG_UNRESTRICTED=1 ./build.sh build</pre>
+    </div>
+    <div class="call info">
       <span class="k">Verifikasi setelah flash</span>
       <p>Buka app <strong>microG Settings → Self-Check</strong>. Baris <em>“System grants signature spoofing”</em> harus tercentang ✓. Lalu login akun Google &amp; aktifkan <em>Cloud Messaging</em> untuk push notification.</p>
-    </div>
-    <div class="call warn">
-      <span class="k">⚠ Tree jadi dirty</span>
-      <p>Patch mengubah <code>frameworks/base</code>. Sebelum <code>repo sync</code> berikutnya: <code>(cd frameworks/base &amp;&amp; git checkout .)</code>. Skrip mendeteksi patch yang sudah terpasang, jadi aman dijalankan berulang.</p>
     </div>
   </section>
 

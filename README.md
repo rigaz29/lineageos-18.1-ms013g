@@ -75,12 +75,27 @@ Branch `lineage-18.1-Go` pada common tree ternyata **snapshot lama** (ahead 0, b
 Integrasi microG memakai repo modern **[`android_vendor_partner_gms`](https://github.com/lineageos4microg/android_vendor_partner_gms)** (pengganti `prebuiltapks` yang sudah deprecated). Aktivasi via `WITH_MICROG=1` menjalankan 3 langkah otomatis di `build.sh`:
 
 1. **Unduh APK** microG (`GmsCore`, `GsfProxy`, `FakeStore`), `F-Droid` + Privileged Extension, dan repo microG F-Droid. APK **tidak** disimpan di git — di-download saat build oleh `vendorsetup.sh`, jadi **butuh koneksi internet** saat aktivasi.
-2. **Signature spoofing** — patch `frameworks/base` dengan [`android_frameworks_base-R.patch`](https://github.com/lineageos4microg/docker-lineage-cicd/tree/master/src/signature_spoofing_patches) (Android 11). Menambah permission `FAKE_PACKAGE_SIGNATURE` + logika spoofing di `PackageManagerService`. Tanpa ini, microG melapor *"Signature spoofing: not supported"* dan gagal login akun Google.
-3. **Sertakan paket** — inherit `vendor/partner_gms/products/gms.mk` ke `lineage_ms013g.mk` (mekanisme `WITH_GMS` LOS 18.1 lewat file opsional yang tak ada di base, jadi inherit langsung lebih andal).
+2. **Sertakan paket** — inherit `vendor/partner_gms/products/gms.mk` ke `lineage_ms013g.mk` (mekanisme `WITH_GMS` LOS 18.1 lewat file opsional yang tak ada di base, jadi inherit langsung lebih andal).
 
 ```bash
 WITH_MICROG=1 ./build.sh build
 ```
+
+### Signature spoofing — sudah bawaan LOS 18.1 (tanpa patch)
+
+LineageOS 18.1 **sudah** memuat signature spoofing versi **restricted** di `frameworks/base` (di-merge LineageOS sendiri). `PackageManagerService.java` punya `MICROG_REAL_SIGNATURE` + `isMicrogSigned()` + `generateFakeSignature()` yang hanya mengizinkan **microG asli** (yang `PRESIGNED`) memalsukan diri jadi **signature Google saja**. Karena `GmsCore/Android.mk` memakai `LOCAL_CERTIFICATE := PRESIGNED`, signature microG dipertahankan → **spoofing jalan otomatis, tanpa patch**.
+
+Patch `frameworks/base` [`android_frameworks_base-R.patch`](https://github.com/lineageos4microg/docker-lineage-cicd/tree/master/src/signature_spoofing_patches) hanya menambah mekanisme **unrestricted** (app apa pun boleh spoof signature apa pun) — sebuah pelemahan keamanan yang **tidak diperlukan** untuk microG. Aktifkan hanya jika perlu:
+
+```bash
+WITH_MICROG=1 MICROG_UNRESTRICTED=1 ./build.sh build   # spoofing generik (jarang perlu)
+```
+
+| | Restricted (default, bawaan) | Unrestricted (`MICROG_UNRESTRICTED=1`) |
+|---|---|---|
+| Yang boleh spoof | hanya microG asli | app apa pun (dgn permission) |
+| Target spoof | hanya signature Google | signature apa pun |
+| Patch `frameworks/base` | tidak | ya |
 
 > **Verifikasi setelah flash:** buka app **microG Settings → Self-Check**. Baris *"System grants signature spoofing"* harus ✓. Lalu login akun Google & aktifkan *Cloud Messaging* untuk push notification.
 

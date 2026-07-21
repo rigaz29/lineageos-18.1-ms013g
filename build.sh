@@ -23,8 +23,12 @@ LOCAL_MANIFEST_SRC="${LOCAL_MANIFEST_SRC:-$(cd "$(dirname "$0")" && pwd)/ms013g.
 JOBS="${JOBS:-$(nproc --all)}"
 ENABLE_GO="${ENABLE_GO:-0}"
 WITH_MICROG="${WITH_MICROG:-0}"
+# LOS 18.1 SUDAH punya signature spoofing 'restricted' bawaan (khusus microG asli),
+# jadi microG jalan TANPA patch. Set MICROG_UNRESTRICTED=1 hanya jika mau spoofing
+# generik (app non-microG boleh spoof) — patch frameworks/base.
+MICROG_UNRESTRICTED="${MICROG_UNRESTRICTED:-0}"
 CLEAN="${CLEAN:-0}"
-# patch signature spoofing untuk Android 11 (LineageOS 18.1)
+# patch signature spoofing generik untuk Android 11 (dipakai hanya bila MICROG_UNRESTRICTED=1)
 MICROG_PATCH_URL="${MICROG_PATCH_URL:-https://raw.githubusercontent.com/lineageos4microg/docker-lineage-cicd/master/src/signature_spoofing_patches/android_frameworks_base-R.patch}"
 
 log()  { printf '\033[1;36m[build]\033[0m %s\n' "$*"; }
@@ -92,8 +96,10 @@ EOF
 }
 
 # ---- 2b. (opsional) integrasi microG (lineageos4microg) --------------------
-# Tiga langkah: (1) unduh APK microG/F-Droid, (2) patch signature spoofing ke
-# frameworks/base, (3) inherit paket microG ke product makefile. Semua idempotent.
+# LOS 18.1 sudah punya signature spoofing 'restricted' bawaan (khusus microG asli
+# yg PRESIGNED), jadi microG jalan TANPA patch frameworks/base.
+# Langkah default: (1) unduh APK, (2) inherit paket ke product makefile.
+# Patch generik hanya dijalankan bila MICROG_UNRESTRICTED=1. Semua idempotent.
 enable_microg() {
   local gms="$SRC_DIR/vendor/partner_gms"
   [ -d "$gms" ] || die "vendor/partner_gms belum ada. Jalankan './build.sh sync' dulu (manifest sudah memuatnya)."
@@ -103,26 +109,7 @@ enable_microg() {
   ( cd "$SRC_DIR" && bash vendor/partner_gms/vendorsetup.sh ) \
     || die "Gagal mengunduh APK microG (cek koneksi internet)."
 
-  # (2) signature spoofing: patch frameworks/base (Android 11 / R)
-  local patchfile; patchfile="$(mktemp)"
-  log "microG: mengunduh patch signature spoofing (R) ..."
-  curl -fsSL "$MICROG_PATCH_URL" -o "$patchfile" || die "Gagal mengunduh patch signature spoofing."
-  (
-    cd "$SRC_DIR/frameworks/base"
-    if git apply --reverse --check "$patchfile" >/dev/null 2>&1; then
-      log "microG: patch signature spoofing sudah terpasang, lewati."
-    elif git apply --check "$patchfile" >/dev/null 2>&1; then
-      git apply "$patchfile" && log "microG: patch signature spoofing DIPASANG."
-    else
-      warn "microG: 'git apply' bersih gagal — coba 'patch -p1 --forward' ..."
-      patch -p1 --forward < "$patchfile" >/dev/null 2>&1 \
-        && log "microG: patch terpasang via patch(1)." \
-        || warn "microG: patch signature spoofing GAGAL — spoofing mungkin nonaktif. Cek konflik di frameworks/base."
-    fi
-  )
-  rm -f "$patchfile"
-
-  # (3) sertakan paket microG ke product (gms.mk = GmsCore, GsfProxy, FakeStore, F-Droid, repo microG)
+  # (2) sertakan paket microG ke product (gms.mk = GmsCore, GsfProxy, FakeStore, F-Droid, repo microG)
   local mk="$SRC_DIR/device/samsung/ms013g/lineage_ms013g.mk"
   if grep -q 'partner_gms/products/gms' "$mk" 2>/dev/null; then
     log "microG: paket sudah di-inherit di lineage_ms013g.mk"
@@ -136,7 +123,33 @@ EOF
   fi
   export WITH_GMS=true
 
-  warn "microG aktif. Tree frameworks/base & device kini 'dirty'. Sebelum 'repo sync' berikutnya:"
+  # (3) signature spoofing:
+  if [ "$MICROG_UNRESTRICTED" != "1" ]; then
+    log "microG: signature spoofing pakai mekanisme RESTRICTED bawaan LOS 18.1 (tanpa patch)."
+    log "microG: microG asli PRESIGNED -> isMicrogSigned() lolos otomatis. Self-check akan ✓."
+    warn "microG aktif (restricted). Tree device 'dirty' (inherit gms.mk). Sebelum 'repo sync' berikutnya:"
+    warn "  (cd $SRC_DIR/device/samsung/ms013g && git checkout -- lineage_ms013g.mk)"
+    return
+  fi
+
+  log "microG: MICROG_UNRESTRICTED=1 -> patch frameworks/base (spoofing GENERIK untuk semua app)."
+  local patchfile; patchfile="$(mktemp)"
+  curl -fsSL "$MICROG_PATCH_URL" -o "$patchfile" || die "Gagal mengunduh patch signature spoofing."
+  (
+    cd "$SRC_DIR/frameworks/base"
+    if git apply --reverse --check "$patchfile" >/dev/null 2>&1; then
+      log "microG: patch generik sudah terpasang, lewati."
+    elif git apply --check "$patchfile" >/dev/null 2>&1; then
+      git apply "$patchfile" && log "microG: patch generik DIPASANG."
+    else
+      warn "microG: 'git apply' bersih gagal — coba 'patch -p1 --forward' ..."
+      patch -p1 --forward < "$patchfile" >/dev/null 2>&1 \
+        && log "microG: patch terpasang via patch(1)." \
+        || warn "microG: patch GAGAL — cek konflik di frameworks/base (mungkin api/current.txt)."
+    fi
+  )
+  rm -f "$patchfile"
+  warn "microG aktif (unrestricted). Tree frameworks/base & device 'dirty'. Sebelum 'repo sync' berikutnya:"
   warn "  (cd $SRC_DIR/frameworks/base && git checkout .)"
   warn "  (cd $SRC_DIR/device/samsung/ms013g && git checkout -- lineage_ms013g.mk)"
 }
