@@ -39,6 +39,22 @@ install_twrp_files() {
   cp "$ANDROID_PRODUCTS_SRC" "$dev/AndroidProducts.mk"
 }
 
+# ---- buang modul yg tak kompatibel dgn tree TWRP/AOSP (idempotent) ---------
+# power-libperfmgr (power HAL ROM) meng-import namespace Pixel (hardware/google/
+# pixel & interfaces) yang tak ada di minimal manifest. Soong mem-parse SEMUA
+# Android.bp -> error 'namespace ... does not exist'. Modul ini tak dipakai
+# recovery, jadi dibuang. (--force-sync akan mengembalikannya, makanya dipanggil
+# ulang tiap sync & sebelum build.)
+strip_incompatible() {
+  local hs="$TWRP_DIR/hardware/samsung"
+  for d in aidl/power-libperfmgr hidl/power-libperfmgr; do
+    if [ -d "$hs/$d" ]; then
+      log "Membuang hardware/samsung/$d (butuh namespace Pixel, tak perlu recovery)"
+      rm -rf "$hs/$d"
+    fi
+  done
+}
+
 # ---- 1. sync ---------------------------------------------------------------
 do_sync() {
   command -v repo >/dev/null || die "'repo' tidak ditemukan (lihat tutorial LOS langkah 1)."
@@ -63,6 +79,7 @@ do_sync() {
   done
 
   install_twrp_files      # dipasang SETELAH sync (agar tak ketimpa --force-sync)
+  strip_incompatible
   log "Sync selesai."
 }
 
@@ -72,6 +89,7 @@ do_build() {
   cd "$TWRP_DIR"
 
   install_twrp_files      # pastikan ada (kalau build dijalankan terpisah)
+  strip_incompatible
 
   # Android build env tidak kompatibel dengan 'set -eu'
   set +eu
