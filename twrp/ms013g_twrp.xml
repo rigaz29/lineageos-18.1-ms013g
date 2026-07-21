@@ -54,21 +54,15 @@
            path="vendor/samsung/msm8226-common"
            remote="rebirth" revision="lineage-18.0" />
 
-  <!-- ================= QCOM (opsional) =================
-       Minimal manifest TWRP berbasis AOSP TIDAK memuat hardware/qcom.
-       Kalau build mengeluh soal 'device/qcom/sepolicy' atau
-       'hardware/qcom/*', HAPUS komentar blok di bawah lalu sync ulang.
-       (Sengaja dinonaktifkan agar sync tetap ramping & repo yg mungkin
-        tak build di tree AOSP tidak ikut kecuali memang diperlukan.)
-
-  <project name="android_device_qcom_sepolicy" path="device/qcom/sepolicy"
-           remote="los" revision="lineage-18.1" />
-  <project name="android_hardware_qcom_display" path="hardware/qcom/display"
-           remote="los" revision="lineage-18.1" />
-  <project name="android_hardware_qcom_audio"   path="hardware/qcom/audio"
-           remote="los" revision="lineage-18.1" />
-  <project name="android_hardware_qcom_media"   path="hardware/qcom/media"
-           remote="los" revision="lineage-18.1" />
-  -->
+  <!-- ================= QCOM =================
+       Minimal manifest TWRP (AOSP murni) tidak memuat device/qcom.
+       msm8226-common/sepolicy/sepolicy.mk meng-'include' sepolicy-legacy
+       secara hard (WAJIB, kalau tidak BoardConfig gagal parse).
+       Repo ini hanya punya branch lineage-16.0 (sepolicy lama & stabil).
+       hardware/qcom/wlan TIDAK diperlukan untuk recovery (hanya referensi
+       header di modul libwcnss_qmi yang tak dibangun di recoveryimage). -->
+  <project name="android_device_qcom_sepolicy-legacy"
+           path="device/qcom/sepolicy-legacy"
+           remote="los" revision="lineage-16.0" />
 
 </manifest>

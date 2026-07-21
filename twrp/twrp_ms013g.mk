@@ -5,9 +5,10 @@
 # Dipasang otomatis oleh build_twrp.sh ke device/samsung/ms013g/twrp_ms013g.mk
 #
 
-# Base AOSP + embedded (untuk recovery image)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/embedded.mk)
+# Base sistem inti (ramping, cocok untuk recovery).
+# CATATAN: twrp-11 TIDAK punya embedded.mk; aosp_base menarik aplikasi handheld
+# yang tak perlu untuk recovery -> pakai base.mk.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
 
 # Konfigurasi TWRP (disediakan minimal manifest di vendor/twrp)
 $(call inherit-product, vendor/twrp/config/common.mk)
