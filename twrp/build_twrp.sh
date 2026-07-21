@@ -46,6 +46,7 @@ install_twrp_files() {
 # recovery, jadi dibuang. (--force-sync akan mengembalikannya, makanya dipanggil
 # ulang tiap sync & sebelum build.)
 strip_incompatible() {
+  # 1) power HAL yg butuh namespace Pixel
   local hs="$TWRP_DIR/hardware/samsung"
   for d in aidl/power-libperfmgr hidl/power-libperfmgr; do
     if [ -d "$hs/$d" ]; then
@@ -53,6 +54,13 @@ strip_incompatible() {
       rm -rf "$hs/$d"
     fi
   done
+  # 2) RIL custom device -> bentrok dgn 'libril' bawaan AOSP hardware/ril.
+  #    Recovery tak butuh RIL; AOSP libril tetap ada untuk referensi parse.
+  local ril="$TWRP_DIR/device/samsung/msm8226-common/ril"
+  if [ -d "$ril" ]; then
+    log "Membuang device/samsung/msm8226-common/ril (libril bentrok dgn AOSP, tak perlu recovery)"
+    rm -rf "$ril"
+  fi
 }
 
 # ---- 1. sync ---------------------------------------------------------------
