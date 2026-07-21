@@ -61,6 +61,36 @@ strip_incompatible() {
     log "Membuang device/samsung/msm8226-common/ril (libril bentrok dgn AOSP, tak perlu recovery)"
     rm -rf "$ril"
   fi
+  # 3) sepolicy-legacy (lineage-16.0/Pie) mendeklarasi tipe yg kini disediakan
+  #    system/sepolicy AOSP 11 -> checkpolicy 'Duplicate declaration of type'.
+  #    Nonaktifkan deklarasi 'type X;' yg duplikat (X tetap ada dari system).
+  #    Dinamis: menangani SEMUA konflik sekaligus (uce_service, port, dll).
+  local leg="$TWRP_DIR/device/qcom/sepolicy-legacy"
+  local sys="$TWRP_DIR/system/sepolicy"
+  if [ -d "$leg" ] && [ -d "$sys" ]; then
+    python3 - "$leg" "$sys" <<'PY'
+import os,sys,re,glob
+leg,sysd=sys.argv[1],sys.argv[2]
+systypes=set()
+for base in ('public','private'):
+    for f in glob.glob(os.path.join(sysd,base,'*.te')):
+        for line in open(f,encoding='utf-8',errors='ignore'):
+            m=re.match(r'\s*type\s+([A-Za-z0-9_]+)\s*[,;]',line)
+            if m: systypes.add(m.group(1))
+changed=0
+for f in glob.glob(os.path.join(leg,'**','*.te'),recursive=True):
+    lines=open(f,encoding='utf-8',errors='ignore').readlines()
+    out=[]
+    for line in lines:
+        m=re.match(r'\s*type\s+([A-Za-z0-9_]+)\s*[,;]',line)
+        if m and m.group(1) in systypes:
+            out.append('# removed dup (already in system/sepolicy): '+line); changed+=1
+        else:
+            out.append(line)
+    if out!=lines: open(f,'w',encoding='utf-8').write(''.join(out))
+print(f'[twrp] sepolicy-legacy: {changed} deklarasi tipe duplikat dinonaktifkan')
+PY
+  fi
 }
 
 # ---- 1. sync ---------------------------------------------------------------

@@ -54,6 +54,15 @@
            path="vendor/samsung/msm8226-common"
            remote="rebirth" revision="lineage-18.0" />
 
+  <!-- ================= TOOLCHAIN =================
+       GCC 4.9 bawaan minimal manifest AOSP HANYA berisi binutils (tak ada
+       binary 'gcc'), sedangkan kernel msm8226 (3.4) wajib GCC. Ganti dengan
+       GCC 4.9 lengkap dari LineageOS. -->
+  <remove-project name="platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9" />
+  <project name="android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9"
+           path="prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9"
+           remote="los" revision="lineage-18.1" clone-depth="1" />
+
   <!-- ================= QCOM =================
        Minimal manifest TWRP (AOSP murni) tidak memuat device/qcom.
        msm8226-common/sepolicy/sepolicy.mk meng-'include' sepolicy-legacy
